@@ -60,7 +60,7 @@ class ScriptRunnerWindow(Gtk.Window):
         """
         # Define Main Window
         super().__init__(title=f'ScriptRunner: {os.getcwd().split("/")[-1]}')
-        self.set_icon_from_file('runner.png')
+        self.set_icon_from_file('icons/runner.png')
         self.connect('delete-event', Gtk.main_quit)
         self.create_menu()
 
@@ -386,7 +386,7 @@ class ScriptRunnerWindow(Gtk.Window):
         show About dialog
         """
         dialog = Gtk.AboutDialog()
-        dialog.set_icon_from_file('runner.png')
+        dialog.set_icon_from_file('icons/runner.png')
         dialog.set_title("About ScriptRunner")
         dialog.set_program_name("ScriptRunner")
         dialog.set_version("1.0")
@@ -395,7 +395,7 @@ class ScriptRunnerWindow(Gtk.Window):
             "scripts on Debian-based systems.")
         dialog.set_authors(["Chris Horn <hammerhorn@gmail.com>"])
         dialog.set_logo(
-            GdkPixbuf.Pixbuf.new_from_file_at_size("runner.png", 64, 64))
+            GdkPixbuf.Pixbuf.new_from_file_at_size("icons/runner.png", 64, 64))
         dialog.set_license("Distributed under the GNU GPL(v3) license.\n")
         dialog.connect('response', lambda dialog, data: dialog.destroy())
         dialog.show_all()
