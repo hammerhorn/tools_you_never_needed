@@ -44,10 +44,12 @@ def _load_script_names():
     """
     maybe magic module should be used?
     """
-    return sorted([
+    script_list = [
         s for s in os.listdir(os.getcwd())
         if (s.endswith('.py') and not (s.startswith('.') or s.startswith('_')))
-    ])
+    ]
+    script_list.sort()
+    return script_list
 
 
 class ScriptRunnerWindow(Gtk.Window):
@@ -92,9 +94,15 @@ class ScriptRunnerWindow(Gtk.Window):
         self.switch_label = Gtk.Label()
         self.switch_label.set_markup(f'<small>in terminal window</small>')
         self.term_state = True
-        self.term_switch = Gtk.Switch()
-        self.term_switch.connect("notify::active", self.on_switch_activated)
-        self.term_switch.set_active(self.term_state)
+
+        #self.term_switch = Gtk.Switch()
+        #self.term_switch = Gtk.Switch()
+        #self.term_switch.connect("notify::active", self.on_switch_activated)
+        #self.term_switch.set_active(self.term_state)
+
+        self.checkbutton = Gtk.CheckButton()
+        self.checkbutton.connect("toggled", self.on_checkbutton_toggled)
+
 
         # args Entry for adding command-line arguments to the selected
         # script
@@ -132,7 +140,8 @@ class ScriptRunnerWindow(Gtk.Window):
         # Switch box
         self.switch_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.switch_box.pack_start(self.switch_label, False, None, 0)
-        self.switch_box.pack_start(self.term_switch, False, None, 0)
+        #self.switch_box.pack_start(self.term_switch, False, None, 0)
+        self.switch_box.pack_start(self.checkbutton, False, None, 0)
 
         # Run button frame
         run_frame = Gtk.Frame(label='Alt+R')
@@ -374,13 +383,17 @@ class ScriptRunnerWindow(Gtk.Window):
             except:
                 return
 
-    def on_switch_activated(self, _widget, _parameter):
-        """
-        when the switch is on, make the self.term_state flag True
-        otherwise make it False
-        """
-        self.term_state = self.term_switch.get_active()
+#    def on_switch_activated(self, _widget, _parameter):
+#        """
+#        when the switch is on, make the self.term_state flag True
+#        otherwise make it False
+#        """
+#        self.term_state = self.term_switch.get_active()
 
+
+    def on_checkbutton_toggled(self, _):
+        self.term_state = self.checkbutton.get_active()
+        
     def show_about(self, _):
         """
         show About dialog
