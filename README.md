@@ -5,7 +5,8 @@ If a module from the 'site-packages' directory is needed, it can either be
 placed in your python path or in the same directory as the script to be run.
 
 There are various dependencies for things sometimes.  If it doesn't work, you
-might need: sox, abcm2ps, abcmidi, ghostscript, imagemagick, or something else.
+might need: fortune, cowsay, toilet, sox, abcm2ps, abcmidi, ghostscript,
+imagemagick, or something else.
 
 Various 3rd-party python modules, too: termcolor, gtk, pyperclip, maybe some
 others.
