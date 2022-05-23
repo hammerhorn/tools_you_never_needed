@@ -4,7 +4,6 @@ Run, edit, lint, and view auto-documentation for Python scripting.
 Currently uses x-termal-emulator, so only works with Debian-based OSes.
 """
 # Standard Library
-import atexit
 import os
 import subprocess
 import sys
@@ -19,26 +18,13 @@ from gi.repository import Gtk
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
+import runbashcommand
+
 __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 __license__ = 'GPL'
 
 MODULE_NAME = termcolor.colored(
     sys.argv[0].split('/')[-1].split('.')[0], attrs=['underline'])
-
-SCRIPT = f"""#!/usr/bin/env bash
-python3 {{}} {{}}
-echo "[?25l"                                                    
-echo "{MODULE_NAME}:\nPress [ENTER] to close window."                             
-read -s -n 1 x                                                    
-"""
-
-def _clean():
-    """
-    not sure if it will know what directory i mean, but it's a
-    starting point
-    """
-    if 'temp.sh' in os.listdir(os.getcwd()):
-        os.remove('temp.sh')
 
 def _load_script_names():
     """
@@ -51,7 +37,6 @@ def _load_script_names():
     script_list.sort()
     return script_list
 
-
 class ScriptRunnerWindow(Gtk.Window):
     """
     main window for this app, has a ComboBox, Entry, Switch, and some Buttons
@@ -61,17 +46,31 @@ class ScriptRunnerWindow(Gtk.Window):
         main window and all of the widgets needed
         """
         # Define Main Window
-        super().__init__(title=f'ScriptRunner: {os.getcwd().split("/")[-1]}')
+        self.selected_dir = os.getcwd()
+        self.line_number = None
+        super().__init__(title=f'ScriptRunner: {self.selected_dir.split("/")[-1]}')
         self.set_icon_from_file('icons/runner.png')
         self.connect('delete-event', Gtk.main_quit)
+
+        # overhead menus
         self.create_menu()
+
+        # Accel Group
+        #accelgroup = Gtk.AccelGroup()
 
         # This stuff is for the ComboBox
         self.scriptnames_liststore = Gtk.ListStore(str)
         self.selected_script = self.create_combobox()
 
-        # Declare some other variables for future use
-        self.proc = None
+        # maybe this is not efficient
+        with open(self.selected_script, 'r') as fp:
+            lines_in_file = len(fp.readlines())
+
+        # spinbutton
+        self.line_number = Gtk.SpinButton.new_with_range(1, lines_in_file, 1)
+        self.line_number.set_width_chars(3)
+        self.line_number.set_alignment(xalign=1)
+        self.line_number.set_value(1)#lines_in_file)
 
         # Run button launches the selected program
         self.run_button = Gtk.Button.new_with_mnemonic('_Run')
@@ -89,20 +88,15 @@ class ScriptRunnerWindow(Gtk.Window):
         doc_button = Gtk.Button.new_with_mnemonic(label='py_doc\n(Alt+D)')
         doc_button.connect("clicked", self.doc_clicked)
 
-        # 'Run in terminal' switch (Switch can be replaced with 'Run in
-        # terminal' button if desired)
+        # 'Run in terminal' checkbox (Checkbox can be replaced with
+        # 'Run in terminal' button if desired)
         self.switch_label = Gtk.Label()
         self.switch_label.set_markup(f'<small>in terminal window</small>')
         self.term_state = True
 
-        #self.term_switch = Gtk.Switch()
-        #self.term_switch = Gtk.Switch()
-        #self.term_switch.connect("notify::active", self.on_switch_activated)
-        #self.term_switch.set_active(self.term_state)
-
         self.checkbutton = Gtk.CheckButton()
         self.checkbutton.connect("toggled", self.on_checkbutton_toggled)
-
+        self.checkbutton.set_active(True)
 
         # args Entry for adding command-line arguments to the selected
         # script
@@ -113,9 +107,6 @@ class ScriptRunnerWindow(Gtk.Window):
         line_number_label = Gtk.Label()
         line_number_label.set_markup('<small>line number:</small>')
         line_number_label.set_xalign(0)
-        self.line_number = Gtk.Entry(width_chars=3)
-        self.line_number.set_alignment(xalign=1)
-        self.line_number.set_text('1')
         line_number_box.pack_start(line_number_label, False, False, 0)
         line_number_box.pack_start(self.line_number, False, False, 0)
 
@@ -140,7 +131,6 @@ class ScriptRunnerWindow(Gtk.Window):
         # Switch box
         self.switch_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.switch_box.pack_start(self.switch_label, False, None, 0)
-        #self.switch_box.pack_start(self.term_switch, False, None, 0)
         self.switch_box.pack_start(self.checkbutton, False, None, 0)
 
         # Run button frame
@@ -178,6 +168,18 @@ class ScriptRunnerWindow(Gtk.Window):
         self.main_layout.pack_start(self.top_row, False, False, 0)
         self.main_layout.pack_start(self.middle_and_bottom, True, True, 0)
         self.add(self.main_layout)
+
+
+    def update_spinbutton(self, _):
+        """
+        refresh the max line length possible using the spinbutton
+        This does not play nicely with terminator.
+        """
+        with open(self.selected_script, 'r') as fp:
+            lines_in_file = len(fp.readlines())
+        if self.line_number:
+            self.line_number.set_range(1, lines_in_file)
+            self.line_number.set_value(1)
 
     def create_menu(self):
         """
@@ -224,7 +226,6 @@ class ScriptRunnerWindow(Gtk.Window):
         """
         self.combobox = Gtk.ComboBox.new_with_model(self.scriptnames_liststore)
         self.combobox.connect("changed", self.update_selected_script)
-
         renderer_text = Gtk.CellRendererText()
 
         for script_name in _load_script_names():
@@ -239,27 +240,35 @@ class ScriptRunnerWindow(Gtk.Window):
         """
         refresh the list of scripts upon user request
         """
+        current_script = self.selected_script
         self.scriptnames_liststore.clear()
-        for script_name in _load_script_names():
+        script_list = _load_script_names()
+        for script_name in script_list:
             self.scriptnames_liststore.append([script_name])
-        self.combobox.set_active(0)
-        self.update_selected_script(self.combobox)
+        try:
+            self.combobox.set_active(script_list.index(current_script))
+        except:
+            pass
+
+        self.set_title(f'ScriptRunner: {self.selected_dir.split("/")[-1]}')
 
     def update_selected_script(self, combo):
         """
         update the selected script when the combobox is changed
         """
         tree_iter = combo.get_active_iter()
-        if tree_iter: # is not None:
+        if tree_iter:
             model = combo.get_model()
             self.selected_script = model[tree_iter][0]
+
+        self.update_spinbutton(None)
 
     def file_cd_clicked(self, _):
         """
         use a file chooser dialog to change directories and update
         titlebar
         """
-        _clean()
+        #_clean()
         dialog = Gtk.FileChooserDialog(
             title="Please choose a directory...", parent=self,
             action=Gtk.FileChooserAction.SELECT_FOLDER)
@@ -270,9 +279,9 @@ class ScriptRunnerWindow(Gtk.Window):
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            selected_dir = dialog.get_filename()
-            os.chdir(selected_dir)
-            self.set_title(f'ScriptRunner: {selected_dir.split("/")[-1]}')
+            self.selected_dir = dialog.get_filename()
+            os.chdir(self.selected_dir)
+            self.set_title(f'ScriptRunner: {self.selected_dir.split("/")[-1]}')
             self.refresh_combobox(_)
         dialog.destroy()
 
@@ -287,137 +296,85 @@ class ScriptRunnerWindow(Gtk.Window):
         # There is probably a better way
         if self.selected_script:
             args = self.args_entry.get_text()
+            command_str = f'python3 {self.selected_script} {args}'
             if self.term_state:
                 # Find a more portable way to set the title
-                #command_str = f'chmod +x temp.sh && x-terminal-emulator -e '\
-                #    './temp.sh -T'\
-                #    f' {self.selected_script} -e ./temp.sh'
-                command_str = f'x-terminal-emulator -T {self.selected_script}'\
-                    f' -e bash temp.sh'
-                with open('temp.sh', 'w') as temp_script:
-                    temp_script.write(SCRIPT.format(
-                        self.selected_script,
-                        args))
+                runbashcommand.runbashcommand(command_str)
             else:
-                # if the switch is unselected, run the program without
+                # if the checkbox is unselected, run the program without
                 # opening up a new terminal window
-                command_str = f'python3 {self.selected_script} {args}&'
-            proc = subprocess.Popen(command_str, shell=True)
-            proc.wait()
+                proc = subprocess.Popen(f'{command_str}&', shell=True)
+                proc.wait()
 
-    #def run_in_term_clicked(self, _):
-    # There is probably a better way
-    #    if self.selected_script:
-    #        proc_str_list = []
-    #       #if self.term_state:
-    #        proc_str_list.append(
-    #            f'x-terminal-emulator -T "RUN: {self.selected_script}" -e "')
-    #        proc_str_list.extend((
-    #            f'python3 {self.selected_script}',
-    #            f' {self.args_entry.entry.get_text()}'))
-    #        proc_str_list.append('; echo; echo -n \'[?25lPress [ENTER]\'; read"')
-    #        ##print(''.join(proc_str_list))
-    #        try:
-    #            self.proc = subprocess.Popen(''.join(proc_str_list), shell=True)
-    #            #f'terminator -x "python3 {self.selected_script}
-    #            #{self.args_entry.entry.get_text()}; echo Done."', shell=True)
-    #            #f'qterminal -e "python3 {self.selected_script}
-    #            #{self.args_entry.entry.get_text()}"', shell=True)
-    #            self.proc.wait()
-    #       #print('Done.')
-    #        except: # KeyboardInterrupt:
-    #            print('Something failed.') # Should be graphical
+            self.refresh_combobox(None)
 
     def edit_clicked(self, _):
         """
         when the edit button is clicked, let's open the selected file in
         the default editor in a new terminal window
         """
+        # As long as you use a separate module (runbashcommand) you
+        # won't have issues like before
         entry_text = self.line_number.get_text()
-        edit_command_list = [
-            f'x-terminal-emulator -T "EDIT: {self.selected_script}" -e "editor '
-        ]
-        if entry_text:
-            edit_command_list.append(f'+{entry_text} ')
-        edit_command_list.append(f'{self.selected_script}"')
-        edit_command = ''.join(edit_command_list)
-
-        if self.selected_script:
-            try:
-                # 'x-terminal-emulator' command will only work on
-                # Debian-type systems.  This could be changed to use a
-                # different editor, even a gui one, maybe with the
-                # 'editor' command.
-                self.proc = subprocess.Popen(edit_command, shell=True)
-                self.proc.wait()
-            except:
-                return
+        runbashcommand.runbashcommand(f'editor +{entry_text} {self.selected_script}')
+        self.update_spinbutton(None)
 
     def lint_clicked(self, _):
         """
         when lint button is clicked, let's open pylint on the file in a
-        new terminal window
+        new window of your default terminal emulator
         """
+        self.refresh_combobox(None)
         if self.selected_script:
-            try:
-                self.proc = subprocess.Popen(''.join((
-                    f'x-terminal-emulator -T "LINT: {self.selected_script}" ',
-                    f'-e "pylint {self.selected_script}|less"')), shell=True)
-                self.proc.wait()
-            except:
-                return
+            runbashcommand.runbashcommand(f'pylint {self.selected_script}|less')
+            #try:
+                #proc = subprocess.Popen(''.join((
+                #    f'x-terminal-emulator -T "LINT: {self.selected_script}" ',
+                #    f'-e "pylint {self.selected_script}|less"')), shell=True)
+                #proc.wait()
+            #except:
+            #    return
 
     def doc_clicked(self, _):
         """
         when pydoc button is clicked, let's open pydoc on the file in a
-        new terminal window
+        new window of your default terminal emulator
         """
+        self.refresh_combobox(None)
         if self.selected_script:
             mod_name = '.'.join(self.selected_script.split('.')[:-1])
-            try:
-                self.proc = subprocess.Popen(''.join((
-                    f'x-terminal-emulator -T "PYDOC: {mod_name} module" ',
-                    f'-e "pydoc3 \'{mod_name}\'"')), shell=True)
-                self.proc.wait()
-
-            except:
-                return
-
-#    def on_switch_activated(self, _widget, _parameter):
-#        """
-#        when the switch is on, make the self.term_state flag True
-#        otherwise make it False
-#        """
-#        self.term_state = self.term_switch.get_active()
-
+            runbashcommand.runbashcommand(f'pydoc3 "{mod_name}"')
+            #try:
+            #    proc = subprocess.Popen(''.join((
+            #        f'x-terminal-emulator -T "PYDOC: {mod_name} module" ',
+            #        f'-e "pydoc3 \'{mod_name}\'"')), shell=True)
+            #    proc.wait()
+            #
+            #except:
+            #    return
 
     def on_checkbutton_toggled(self, _):
         self.term_state = self.checkbutton.get_active()
-        
+
     def show_about(self, _):
         """
         show About dialog
         """
-        dialog = Gtk.AboutDialog()
-        dialog.set_icon_from_file('icons/runner.png')
-        dialog.set_title("About ScriptRunner")
-        dialog.set_program_name("ScriptRunner")
-        dialog.set_version("1.0")
-        dialog.set_comments(
+        about_dialog = Gtk.AboutDialog()
+        about_dialog.set_icon_from_file('icons/runner.png')
+        about_dialog.set_title("About ScriptRunner")
+        about_dialog.set_program_name("ScriptRunner")
+        about_dialog.set_version("0.0")
+        about_dialog.set_comments(
             "Simple, light-weight development environment for writing Python3 "\
             "scripts on Debian-based systems.")
-        dialog.set_authors(["Chris Horn <hammerhorn@gmail.com>"])
-        dialog.set_logo(
+        about_dialog.set_authors(["Chris Horn <hammerhorn@gmail.com>"])
+        about_dialog.set_logo(
             GdkPixbuf.Pixbuf.new_from_file_at_size("icons/runner.png", 64, 64))
-        dialog.set_license("Distributed under the GNU GPL(v3) license.\n")
-        dialog.connect('response', lambda dialog, data: dialog.destroy())
-        dialog.show_all()
-        #dialog.set_website(
-        #"https://athenajc.gitbooks.io/python-gtk-3-api/content/")
-        #dialog.set_website_label("PyGtk3 API")
-
-# make sure ./temp.sh file is gone upon exiting
-atexit.register(_clean)
+        about_dialog.set_license("Distributed under the GNU GPL(v3) license.\n")
+        about_dialog.connect(
+            'response', lambda about_dialog, data: about_dialog.destroy())
+        about_dialog.show_all()
 
 def main():
     """
