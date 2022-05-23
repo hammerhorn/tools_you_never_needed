@@ -79,15 +79,10 @@ class FortuneWindow(Gtk.Window):
         fortune and the window is resized to fit snuggly around
         everything.
         """
-#        proc = subprocess.Popen('fortune', shell=True, stdout=subprocess.PIPE)
-#        self.fortune = str(proc.communicate()[0], 'UTF-8')
         self.fortune = str(subprocess.check_output('fortune', shell=True), 'UTF-8')
 
         self.label.set_label(self.fortune)
-        #self.resize(
-        #    self.label.get_allocation().width, 20 + \
-        #    self.button.get_allocation().height + \
-        #    self.label.get_allocation().height)
+
         self.resize(1, 1)
 
         # I don't want it to start out selected
@@ -96,6 +91,7 @@ class FortuneWindow(Gtk.Window):
 WINDOW = FortuneWindow()
 
 if __name__ == '__main__':
+
     #Run the app
     WINDOW.show_all()
     Gtk.main()
