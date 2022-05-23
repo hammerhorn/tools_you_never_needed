@@ -10,10 +10,11 @@ __license__ = 'GPL'
 
 def main():
     """ Main loop"""
-    print(
-        "\n***Enter a blank value to start over, ^C to quit***")
-
+    
     while True:
+        print(
+            "\n***Enter a blank value to start over, ^C to quit***")
+
         try:
             conditions = ambientconditions.Ambient(
                 float(input("\rtemperature (°F): ")),
