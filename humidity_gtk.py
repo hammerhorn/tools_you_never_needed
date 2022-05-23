@@ -18,16 +18,6 @@ __license__ = 'GPL'
 heading_list = []
 
 
-#class LabelledEntryBox(gtkstuff.LabelledEntryBox):
-#    '''
-#    consists of a text entry box with a text label above it
-#    '''
-#    def __init__(self, text):
-#        super().__init__(
-#            f'<small><b>{text}</b></small>',
-#            orientation=Gtk.Orientation.VERTICAL, spacing=2)
-#        self.label.set_xalign(0)
-
 class LabelledSpinButtonBox(gtkstuff.LabelledSpinButtonBox):
     '''
     consists of a text entry box with a text label above it
@@ -36,6 +26,7 @@ class LabelledSpinButtonBox(gtkstuff.LabelledSpinButtonBox):
         super().__init__(
             lo, hi, step, default, label_markup=f'<small><b>{text}</b></small>', 
             orientation=Gtk.Orientation.VERTICAL, spacing=2, **kwargs)
+
 
 class HumidityWindow(Gtk.Window):
     def __init__(self):
