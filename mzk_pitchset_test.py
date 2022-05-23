@@ -8,14 +8,12 @@ from gi.repository import Gtk
 import gtkstuff
 import soxmusic
 
-
 class PitchSetWindow(Gtk.Window):
     def __init__(self):
         super().__init__(title="<soxmusic.PitchSet>-tester")
         self.connect('delete-event', Gtk.main_quit)
 
         equal_divisions_label = Gtk.Label(label='equal divisions of one octave:')
-        # not sure if these should be ints or 0.1's
         self.equal_divisions_spinbutton = Gtk.SpinButton.new_with_range(1, 100, 1)
         self.equal_divisions_spinbutton.set_value(12)
         self.equal_divisions_spinbutton.connect("value-changed", self.new_pitchset)
@@ -39,7 +37,6 @@ class PitchSetWindow(Gtk.Window):
 
     def play_pitchset(self, _):
         self.pitchset.play()
-        #time.sleep(1)
         self.pitchset.play_chord(wform='tri')  
 
     def new_pitchset(self, _):

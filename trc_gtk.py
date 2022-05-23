@@ -16,13 +16,11 @@ from gi.repository import Gtk
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
-#gi.require_version('GdkPixbuf', '2.0')
-#from gi.repository import GdkPixbuf
 
 # Local modules
 import tonerow
 
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')# @ %(asctime)s')
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
 def _parse_args():
     """
@@ -37,19 +35,18 @@ class TonerowWindow(Gtk.Window):
     Main window that will hold all our buttons
     """
     def __init__(self, **kwargs):
+
         # Make a window
         super().__init__(**kwargs)
-        #super().__init__(default_height=600, default_width=460, **kwargs)
         self.connect("delete-event", Gtk.main_quit)
 
         # Make a tonerow
         self.row = tonerow.Tonerow()
         self.set_title(f'Tonerow Computer: {self.row.seq}')
 
-        # How to implement this....
+        # This will be changed to a Gtk.Notebook in the future
         self.view = 'list'
         logging.debug('Now view mode = "%s"', self.view)
-
 
         # Menu
         self.main_menu_bar = Gtk.MenuBar()
@@ -58,7 +55,6 @@ class TonerowWindow(Gtk.Window):
         file_menu = Gtk.Menu()
         file_menu_dropdown.set_submenu(file_menu)
         
-         
         file_new = Gtk.MenuItem(label='New/Shuffle')
         file_new.connect("activate", self.shuffle)
         file_menu.append(file_new)           
@@ -75,17 +71,16 @@ class TonerowWindow(Gtk.Window):
         edit_menu_dropdown = Gtk.MenuItem(label='Edit')
         edit_menu = Gtk.Menu()
         edit_menu_dropdown.set_submenu(edit_menu)
-        edit_retro = Gtk.MenuItem(label='backwards')#Retrograde')
+        edit_retro = Gtk.MenuItem(label='backwards') # AKA Retrograde
         edit_retro.connect("activate", self.reverse)
         edit_menu.append(edit_retro)
-        edit_invert = Gtk.MenuItem(label='upside-down')#Invert')
+        edit_invert = Gtk.MenuItem(label='upside-down')# AKA Invert
         edit_invert.connect("activate", self.invert)
         edit_menu.append(edit_invert)                
         edit_clockwise = Gtk.MenuItem(label='clockwise 90°')
         edit_clockwise.connect("activate", self.rotate)
         edit_menu.append(edit_clockwise)                
         edit_menu.append(Gtk.SeparatorMenuItem())
-        #edit_menu.append(edit_shuffle)        
         edit_zero = Gtk.MenuItem(label='Zero')
         edit_zero.connect("activate", self.zero)
         edit_menu.append(edit_zero)
@@ -93,9 +88,6 @@ class TonerowWindow(Gtk.Window):
         view_menu_dropdown = Gtk.MenuItem(label='View')
         view_menu = Gtk.Menu()
         view_menu_dropdown.set_submenu(view_menu)
-        #view_staff = Gtk.MenuItem(label='Music Staff (PNG)')
-        #view_staff.connect("activate", self.open_postscript)
-        #view_menu.append(view_staff)                
         view_matplot = Gtk.MenuItem(label='matplot')
         view_matplot.connect("activate", self.plot)
         view_menu.append(view_matplot)                
@@ -126,7 +118,7 @@ class TonerowWindow(Gtk.Window):
         self.info_label = Gtk.Label()
         self.info_label.set_selectable(self)
 
-        #Radio Buttons - move this to the overhead menus
+        #Radio Buttons - this will be replaced by a Gtk.Notebook
         self.listfreqs_button = Gtk.RadioButton(label='List View')
         self.listfreqs_button.connect("toggled", self.toggle_views)
         
@@ -155,7 +147,6 @@ class TonerowWindow(Gtk.Window):
         view_radiobox.pack_start(self.listfreqs_button, True, False, 0)
         view_radiobox.pack_start(self.grid_button, True, False, 0)
         view_radiobox.pack_start(self.abc_button, True, False, 0)
-
 
         main_box.pack_start(self.main_menu_bar, False, None, 0)       
         main_box.pack_start(self.staff_image, False, None, 0)
@@ -207,7 +198,9 @@ class TonerowWindow(Gtk.Window):
             f'{textwrap.dedent(self.row.listfreqs(get_str=True))}\n</span>')
 
     def open_postscript(self, _):
-        """open in postscript reader as staff notation; uses xdg-open and abc2ps"""
+        """
+        open in postscript reader as staff notation; uses xdg-open and abc2ps
+        """
         self.row.open_staff()
 
     def update_output(self, _):
@@ -244,7 +237,6 @@ class TonerowWindow(Gtk.Window):
                 f'\n\n{self.row.generate_abc_str()}\n\n\n\n\n'\
                 '</span>')
          
-
     def play_midi(self, _):
         """play the row with your midi player"""
         self.row.play_midi()
@@ -262,7 +254,6 @@ class TonerowWindow(Gtk.Window):
             }
         self.view = selection_dict[selection]
         logging.debug('Selection is %s, switching to %s', selection, self.view)            
-        #self.update_output(None)
         self.change_views()
 
     def show_about(self, _):
@@ -270,7 +261,6 @@ class TonerowWindow(Gtk.Window):
         show About dialog
         """
         dialog = Gtk.AboutDialog()
-        #dialog.set_icon_from_file()
         dialog.set_title("About Tonerow Computer GTK")
         dialog.set_program_name("Tonerow Computer GTK")
         dialog.set_version("0.0")
@@ -278,9 +268,6 @@ class TonerowWindow(Gtk.Window):
             "Tool for generating and manipulating tonerows for musical "\
             "serialism.")
         dialog.set_authors(["Chris Horn <hammerhorn@gmail.com>"])
-	#dialog.set_logo(
-        #    GdkPixbuf.Pixbuf.new_from_file_at_size(
-        #        "icons/rainbowflag.png", 64, 64))
         dialog.set_license("Distributed under the GNU GPL(v3) license.\n")
         dialog.connect('response', lambda dialog, data: dialog.destroy())
         dialog.show_all()
