@@ -11,6 +11,6 @@ imagemagick, or something else.
 Various 3rd-party python modules, too: termcolor, gtk, pyperclip, matplotlib,
 maybe some others.
 
-I wouldn't expect any of this to work on anything but Linux.  ScriptRunner uses
+I wouldn't expect any of this to work on anything but Linux.  ``script_runner.py`` uses
 the 'editor' and 'x-terminal-emulator' commands, so I wouldn't expect it to
 work on anything other than a Debian-based OS (Debian, Mint, Ubuntu....)
