@@ -4,18 +4,17 @@ Depends: abc2midi, abcm2ps, ghostscript, imagemagick, python-termcolor,
          sox, timidity/timidity++, (configured with a soundfont if
          necessary, e.g., timidity-freepats))
 """
-#print("Std Lib")
+#Std Lib
 import argparse
 import atexit
 import readline
 import subprocess
 import sys
-#import threading
 
-#print("3rd party")
+# Third-party
 from termcolor import colored
 
-#print("local")
+# Local
 from tonerow import Tonerow
 import misc
 import termctl
@@ -25,7 +24,7 @@ import rlif
 __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 
 
-#SQUAD_GOALS = """
+#GOALS = """
 #    - generate full 2-d matrix
 #    - the ability to input specific rows instead of generating them
 #    - Save as text
@@ -71,11 +70,9 @@ def main():
     """
     create a tone row and start command shell
     """
-    #def new_row():
     welcome()
     rlif.howto()
- 
- 
+  
     row = Tonerow(TONE_COUNT)
 
     #new_row()
@@ -113,9 +110,6 @@ def main():
     # Use the tab key for completion
     readline.parse_and_bind('tab: complete')
 
-    #print(f'{row.__repr__()}')
-    #print(f' {list(cmd_dict.keys())}')
-
     while True:
         print('>', end='', flush=True)
         raw_command = input()
@@ -139,8 +133,5 @@ def main():
         #print(f'{list(cmd_dict.keys())}\n')
         rlif.howto()
 
-#atexit.register(misc.end_app)  # Marks this app as having finished its first run
 if __name__ == '__main__':
-    #if misc.is_first_run():
-    #termctl.clear(6)
     main()
