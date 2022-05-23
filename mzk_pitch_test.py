@@ -11,9 +11,6 @@ from gi.repository import Gtk
 import gtkstuff
 import soxmusic
 
-#output_count = 0
-
-
 # Gonna go all out with classes on this one lol
 class InputFrame(Gtk.Frame):
     def __init__(self, mnemonic='Alt+_C', **kwargs):
@@ -34,9 +31,8 @@ class OutputFrame(Gtk.Frame):
 class PitchBox(Gtk.Box):
     def __init__(self, button_mnem='Alt+_C', name='PitchBox', **kwargs):
         super().__init__(border_width=10, orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        self.pitch = soxmusic.Pitch() # maybe change this later
+        self.pitch = soxmusic.Pitch()
         self.input_frame = InputFrame(label=name, mnemonic=button_mnem)
- #       output_count += 1
         self.output_frame = OutputFrame(label=name)
         self.autoplay = False
         self.pack_start(self.output_frame, False, None, 0)
@@ -78,10 +74,6 @@ class NotenameBox(PitchBox):
         super().__init__(name='by note name', button_mnem='play (_note name)')
 
         # MAKE THE WIDGETS
-        #self.input_frame.lettername_entrybox = gtkstuff.LabelledEntryBox(
-        #    'Note name:', orientation=Gtk.Orientation.HORIZONTAL)
-        #self.input_frame.lettername_entrybox.entry.set_width_chars(3)
-        #self.input_frame.lettername_entrybox.entry.set_text('C')
         self.output_frame.set_label('Pitch #1')
         notename_list = [i[0] for i in soxmusic.NOTENAMES]
         self.input_frame.lettername_entrybox = LabelledComboBox(
@@ -109,8 +101,6 @@ class NotenameBox(PitchBox):
             orientation=Gtk.Orientation.HORIZONTAL)
         self.input_frame.cents_entrybox.spinbutton.set_alignment(xalign=1)
         self.input_frame.cents_entrybox.spinbutton.set_width_chars(3)
-        #self.input_frame.cents_entrybox.spinbutton.connect(
-        #    "value-changed", self.on_note_changed)
         self.input_frame.button.connect("clicked", self.on_click)
 
         # MAKE ADDITIONAL LAYOUT BOXES
@@ -179,9 +169,6 @@ class FrequencyBox(PitchBox):
         self.output_frame.label.set_markup(
             f'<span font="serif" size="large"><b>{self.pitch.__str__()}'\
             '</b></span>')
-        #print(self.autoplay)
-        #if self.autoplay:
-        #    self.pitch.play()
 
     def on_click(self, _):
         """define the note by frequency"""
@@ -191,27 +178,15 @@ class FrequencyBox(PitchBox):
 
     def on_note_changed(self, _):
         self.update_output_label(None)
-    #    decimal.getcontext().prec = 2
-    #    freq_dec = decimal.Decimal(self.pitch.freq)
-    #    #if  
-    #    if self.autoplay:# and (freq_dec - decimal.Decimal(int(self.pitch.freq)) == 0.0):
-    #        self.pitch.play()
 
 class PitchTestBox(Gtk.Box):
     def __init__(self):
         super().__init__(
             orientation=Gtk.Orientation.VERTICAL, spacing=10, border_width=10)
-        #self.pitchcount = 0
-        # MAKE THE WIDGETS
-        #title = Gtk.Label()
-        #title.set_markup("<span font='serif' size='x-large'><i>Pitch Test</i></span>")
 
-        #instructions = Gtk.Label()
-        #instructions.set_markup(
-         #   "<u>INSTRUCTIONS</u>: please turn off the JACK server if it is running.\n"
-         #   "('b'=flat sign, '#'=sharp sign)")
-        self.notename_box = NotenameBox()#'Pitch #1')
-        self.frequency_box = FrequencyBox()#'Pitch #2')
+        # MAKE THE WIDGETS
+        self.notename_box = NotenameBox()
+        self.frequency_box = FrequencyBox()
 
         # MAKE LAYOUT BOXES
         methods_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -230,22 +205,18 @@ class PitchTestBox(Gtk.Box):
         methods_box.pack_start(self.notename_box, False, None, 0)
         methods_box.pack_start(right_column, False, None, 0)
 
-        #self.pack_start(title, False, None, 0)
-        #self.pack_start(Gtk.Separator(), False, None, 0)        
-        #self.pack_start(instructions, False, None, 0)
         self.pack_start(methods_box, False, None, 0)
         
     def on_switch_activated(self, switch, gparam):
         if self.autoplay_switch.get_active():
             self.notename_box.autoplay = True
-            #self.frequency_box.autoplay = True
             self.notename_box.input_frame.lettername_entrybox.label.set_markup(r'<b>note name</b>:')
             self.notename_box.input_frame.octave_entrybox.label.set_markup(r'<b>octave</b>:')
         else:
             self.notename_box.autoplay = False
-            #self.frequency_box.autoplay = False
             self.notename_box.input_frame.lettername_entrybox.label.set_markup('note name:')
             self.notename_box.input_frame.octave_entrybox.label.set_markup(r'octave:')
+
 def main():
     # MAKE A MAIN WINDOW AND RUN THE THING
     window = Gtk.Window(title="<soxmusic.Pitch>-tester")        
@@ -253,7 +224,6 @@ def main():
     window.add(PitchTestBox())
     window.show_all()
     Gtk.main()
-
 
 if __name__ == '__main__':
     main()
