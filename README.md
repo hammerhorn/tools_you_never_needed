@@ -8,8 +8,8 @@ There are various dependencies for things sometimes.  If it doesn't work, you
 might need: fortune, cowsay, toilet, sox, abcm2ps, abcmidi, ghostscript,
 imagemagick, or something else.
 
-Various 3rd-party python modules, too: termcolor, gtk, pyperclip, maybe some
-others.
+Various 3rd-party python modules, too: termcolor, gtk, pyperclip, matplotlib,
+maybe some others.
 
 I wouldn't expect any of this to work on anything but Linux.  ScriptRunner uses
 the 'editor' and 'x-terminal-emulator' commands, so I wouldn't expect it to
