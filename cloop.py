@@ -35,18 +35,18 @@ def _parse_args():
         action='store_true',
         help='set language to C++ (default language is C)')
     parser.add_argument(
-        '--f90', action='store_true', help='set language to Fortran 90')
+        '--f95', action='store_true', help='set language to Fortran 95')
     return parser.parse_args() if __name__ == '__main__' else None
 
 def _set_language(args):
     """
-    supports C, C++, or Fortran-90.
+    supports C, C++, or Fortran-95.
     """
-    if args.f90:
+    if args.f95:
         if args.cpp:
             sys.exit('Please choose one language.\n')
         else:
-            lang = 'f90'
+            lang = 'f95'
     elif args.cpp:
         lang = 'cpp'
     else:
@@ -78,8 +78,8 @@ atexit.register(cleanup)
 # make this a dictionary
 if EXTENSION == 'cpp':
     TITLE = 'C++ LOOP'
-elif EXTENSION == 'f90':
-    TITLE = 'FORTRAN 90 LOOP'
+elif EXTENSION == 'f95':
+    TITLE = 'FORTRAN 95 LOOP'
 else:
     TITLE = 'C LOOP'
 
@@ -96,17 +96,17 @@ def main():
     """
 
     include_dict = {
-        'f90': '',
+        'f95': '',
         'cpp': '#include <iostream>\n',
         'c'  : '#include <stdio.h>\n'}
 
     startblock_dict = {
-        'f90': 'PROGRAM Interactive\nIMPLICIT NONE\n',
+        'f95': 'PROGRAM Interactive\nIMPLICIT NONE\n',
         'c'  : 'int main(int argc, char* argv[])\n{\n',
         'cpp': 'using namespace std;\nint main(int argc, char* argv[])\n{\n'}
 
     prompt_dict = {
-        'f90': '+',
+        'f95': '+',
         'cpp': '%%',
         'c': '%'}
 
@@ -115,7 +115,7 @@ def main():
         'c': '\n\treturn 0;\n}'}
 
     compiler_dict = {
-        'f90': 'gfortran',
+        'f95': 'gfortran',
         'c': 'gcc',
         'cpp': 'g++'}
 

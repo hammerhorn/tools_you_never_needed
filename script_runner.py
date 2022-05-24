@@ -123,10 +123,10 @@ class ScriptRunnerWindow(Gtk.Window):
             orientation=Gtk.Orientation.VERTICAL)
 
         # Command frame
-        command_frame = Gtk.Frame(label='command line')
+        #command_frame = Gtk.Frame(label='command line')
         self.command_row.pack_start(self.combobox, False, False, 0)
         self.command_row.pack_start(self.args_entry, True, True, 0)
-        command_frame.add(self.command_row)
+        #command_frame.add(self.command_row)
 
         # Switch box
         self.switch_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -148,7 +148,7 @@ class ScriptRunnerWindow(Gtk.Window):
             border_width=10, orientation=Gtk.Orientation.HORIZONTAL,
             spacing=10)
         edit_box.pack_start(edit_button, False, False, 0)
-        edit_box.pack_start(line_number_box, False, False, 0)
+        #edit_box.pack_start(line_number_box, False, False, 0)
         edit_frame.add(edit_box)
 
         # Other buttons area
@@ -159,11 +159,12 @@ class ScriptRunnerWindow(Gtk.Window):
 
         # Pack boxes
         self.top_row.pack_start(self.main_menu_bar, False, False, 0)
-        self.bottom_row.pack_start(run_frame, True, True, 0)
-        self.bottom_row.pack_start(edit_frame, True, True, 0)
-        self.bottom_row.pack_start(other_buttons, True, True, 0)
-        self.middle_and_bottom.pack_start(command_frame, False, False, 0)
-        self.middle_and_bottom.pack_start(self.bottom_row, True, True, 0)
+        #self.bottom_row.pack_start(run_frame, True, True, 0)
+        #self.bottom_row.pack_start(edit_frame, True, True, 0)
+        #self.bottom_row.pack_start(other_buttons, True, True, 0)
+        self.command_row.pack_start(line_number_box, False, None, 0)
+        self.middle_and_bottom.pack_start(self.command_row, False, False, 0)
+        #self.middle_and_bottom.pack_start(self.bottom_row, True, True, 0)
         self.middle_and_bottom.set_border_width(10)
         self.main_layout.pack_start(self.top_row, False, False, 0)
         self.main_layout.pack_start(self.middle_and_bottom, True, True, 0)

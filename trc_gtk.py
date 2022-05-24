@@ -5,6 +5,7 @@ graphical front end for testing class <tonerow.Tonerow>
 # Standard Library
 import argparse
 import logging
+import pickle
 import textwrap
 
 # Third-party
@@ -58,9 +59,12 @@ class TonerowWindow(Gtk.Window):
         file_new = Gtk.MenuItem(label='New/Shuffle')
         file_new.connect("activate", self.shuffle)
         file_menu.append(file_new)           
-        file_open = Gtk.MenuItem(label='Open')
-        file_menu.append(file_open)        
-        file_save = Gtk.MenuItem(label='Save')
+
+        file_open = Gtk.MenuItem(label='Open pickle')
+        file_open.connect("activate", self.openp)        
+        file_menu.append(file_open)
+        
+        file_save = Gtk.MenuItem(label='Save pickle')
         file_save.connect("activate", self.save)
         file_menu.append(file_save)
         file_menu.append(Gtk.SeparatorMenuItem())        
@@ -81,14 +85,14 @@ class TonerowWindow(Gtk.Window):
         edit_clockwise.connect("activate", self.rotate)
         edit_menu.append(edit_clockwise)                
         edit_menu.append(Gtk.SeparatorMenuItem())
-        edit_zero = Gtk.MenuItem(label='Zero')
+        edit_zero = Gtk.MenuItem(label='set to zero')
         edit_zero.connect("activate", self.zero)
         edit_menu.append(edit_zero)
                 
-        view_menu_dropdown = Gtk.MenuItem(label='View')
+        view_menu_dropdown = Gtk.MenuItem(label='Plot')
         view_menu = Gtk.Menu()
         view_menu_dropdown.set_submenu(view_menu)
-        view_matplot = Gtk.MenuItem(label='matplot')
+        view_matplot = Gtk.MenuItem(label='matplotlib')
         view_matplot.connect("activate", self.plot)
         view_menu.append(view_matplot)                
 
@@ -114,21 +118,6 @@ class TonerowWindow(Gtk.Window):
         self.main_menu_bar.append(view_menu_dropdown)
         self.main_menu_bar.append(play_menu_dropdown)
         self.main_menu_bar.append(help_menu_dropdown)
-        
-        self.info_label = Gtk.Label()
-        self.info_label.set_selectable(self)
-
-        #Radio Buttons - this will be replaced by a Gtk.Notebook
-        self.listfreqs_button = Gtk.RadioButton(label='List View')
-        self.listfreqs_button.connect("toggled", self.toggle_views)
-        
-        self.grid_button = Gtk.RadioButton(
-            group=self.listfreqs_button, label='Diagram View')
-        self.grid_button.connect("toggled", self.toggle_views)
-        
-        self.abc_button = Gtk.RadioButton(
-            group=self.listfreqs_button, label='View ABC Code')
-        self.abc_button.connect("toggled", self.toggle_views)
  
         self.staff_image = Gtk.Image()
         self.row.create_ps()
@@ -136,24 +125,64 @@ class TonerowWindow(Gtk.Window):
             f'__data__/{self.row.basename}-cropped.png')
         self.staff_image.set_from_pixbuf(self.pixbuf)
 
-        self.change_views()
+
+        notebook = Gtk.Notebook()
+
+        self.diagram_label = Gtk.Label()
+        self.diagram_label.set_markup(f'<span font="monospace">{self.row.draw(get_str=True, cntrl_chrs=False, heading=False)[1:]}</span>'.replace('[*]', '<span bgcolor="grey">   </span>').replace('.', ' '))
+
+        diagram_box = Gtk.Box(border_width=10)
+        diagram_box.pack_start(self.diagram_label, True, False, 0)
+        notebook.append_page(diagram_box)
+        notebook.set_tab_label_text(diagram_box, 'Diagram View')
+
+        self.listview_label = Gtk.Label()
+        self.listview_label.set_markup(f'<span font="monospace">{textwrap.dedent(self.row.listfreqs(get_str=True))}</span>')
+
+        listview_box = Gtk.Box(border_width=10)
+        listview_box.pack_start(self.listview_label, True, False, 0)
+        notebook.append_page(listview_box)
+        notebook.set_tab_label_text(listview_box, 'List View')
+
+
+
+        self.abc_label = Gtk.Label()
+        self.abc_label.set_markup(f'<span font="monospace">{self.row.generate_abc_str()}</span>')
+
+        abc_box = Gtk.Box(border_width=10)
+        abc_box.pack_start(self.abc_label, True, False, 0)
+        notebook.append_page(abc_box)
+        notebook.set_tab_label_text(abc_box, 'View ABC Code')
+
+        notebook_box = Gtk.Box(border_width=10, orientation=Gtk.Orientation.VERTICAL)
+        notebook_box.pack_start(notebook, False, None, 0)
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        view_radiobox = Gtk.Box(
-            border_width=10,
-            orientation=Gtk.Orientation.HORIZONTAL,
-            spacing=10)
-
-        view_radiobox.pack_start(self.listfreqs_button, True, False, 0)
-        view_radiobox.pack_start(self.grid_button, True, False, 0)
-        view_radiobox.pack_start(self.abc_button, True, False, 0)
 
         main_box.pack_start(self.main_menu_bar, False, None, 0)       
         main_box.pack_start(self.staff_image, False, None, 0)
-        main_box.pack_start(self.info_label, True, True, 0)
-        main_box.pack_start(view_radiobox, True, True, 10)
-        
+        main_box.pack_start(notebook_box, True, False, 0)        
         self.add(main_box)
+
+    def openp(self, _):
+        open_dialog = Gtk.FileChooserDialog(
+            title='File to open...',
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN)
+        open_dialog.set_default_size(650, 400)
+        open_dialog.add_button("_Open", Gtk.ResponseType.OK)
+        
+        open_dialog.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+        open_dialog.set_default_response(Gtk.ResponseType.OK)
+        response = open_dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            fname = open_dialog.get_filename()
+            logging.debug('Filename: %s', fname)
+            with open(fname, 'rb') as pickle_file:
+                self.row = pickle.load(pickle_file)
+                self.update_output(None)
+        open_dialog.destroy()
 
     def save(self, _):
          self.row.save_p_file(self.row.generate_basename())
@@ -193,7 +222,7 @@ class TonerowWindow(Gtk.Window):
         """
         serif font would be nice, but maybe more boxes for formatting
         """
-        self.info_label.set_markup(
+        self.listview_label.set_markup(
             f'<span font="monospace">\n'\
             f'{textwrap.dedent(self.row.listfreqs(get_str=True))}\n</span>')
 
@@ -210,32 +239,30 @@ class TonerowWindow(Gtk.Window):
         """
         logging.debug("update_output START")
         self.set_title(f'Tonerow Computer: {self.row.seq}')
-        self.change_views()
+        self.refresh_notebook()
         self.row.create_ps()
         self.pixbuf = GdkPixbuf.Pixbuf.new_from_file(
             f'__data__/{self.row.generate_basename()}-cropped.png')
         self.staff_image.set_from_pixbuf(self.pixbuf)
         logging.debug("update_output END")
 
-    def change_views(self):
-        if self.view == 'diagram':
-            reformatted_diagram = self.row.draw(
-                get_str=True,
-                cntrl_chrs=False,
-                heading=False)[1:].replace(
-                    '[*]',
-                    '<span bgcolor="grey">   </span>').replace('.', ' ')
-            self.info_label.set_markup(
-                f'<span font="monospace">'\
-                f'{reformatted_diagram}'\
-                '</span>')
-        elif self.view == 'list':
-            self.listfreqs(None)
-        elif self.view == 'abc':
-            self.info_label.set_markup(
-                f'<span font="monospace">'\
-                f'\n\n{self.row.generate_abc_str()}\n\n\n\n\n'\
-                '</span>')
+    def refresh_notebook(self):
+        reformatted_diagram = self.row.draw(
+            get_str=True,
+            cntrl_chrs=False,
+            heading=False)[1:].replace(
+                '[*]',
+                '<span bgcolor="grey">   </span>').replace('.', ' ')
+        self.diagram_label.set_markup(
+            f'<span font="monospace">'\
+            f'{reformatted_diagram}'\
+            '</span>')
+        self.listfreqs(None)
+
+        self.abc_label.set_markup(
+            f'<span font="monospace">'\
+            f'\n\n{self.row.generate_abc_str()}\n\n\n\n\n'\
+            '</span>')
          
     def play_midi(self, _):
         """play the row with your midi player"""

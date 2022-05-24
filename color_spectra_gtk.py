@@ -7,8 +7,8 @@ from gi.repository import Gtk, Gdk
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
+import colorful
 import runbashcommand
-from colorful import color
 
 class ColorSpectraBox(Gtk.Box):
     """all these spinbuttons maybe should be scales"""
@@ -125,7 +125,7 @@ class ColorSpectraBox(Gtk.Box):
         runbashcommand.runbashcommand("python colortrans.py")
 
     def ansi_spinner_changed(self, _):
-        self.color_obj = color.Color(int(self.ansi_spinbutton.get_value()), 'ansi')
+        self.color_obj = colorful.Color(int(self.ansi_spinbutton.get_value()), 'ansi')
         red_percent = int(self.color_obj.hexstring[1:3], 16) / 255.
         green_percent = int(self.color_obj.hexstring[3:5], 16) / 255.
         blue_percent = int(self.color_obj.hexstring[5:7], 16) / 255.
@@ -137,16 +137,18 @@ class ColorSpectraBox(Gtk.Box):
         green = int(self.g_spinbutton.get_value())
         blue = int(self.b_spinbutton.get_value())
         hexstr = f'#{red:02x}{green:02x}{blue:02x}'
-        self.color_obj = color.Color(hexstr, 'hex')
+        self.color_obj = colorful.Color(hexstr, 'hex')
         red_percent = red / 255.
         green_percent = green / 255.
         blue_percent = blue /255.
-        gdk_color = Gdk.RGBA(red=red_percent, green=green_percent, blue=blue_percent)
+        gdk_color = Gdk.RGBA(
+            red=red_percent, green=green_percent, blue=blue_percent)
         self.rgb_colorbutton.set_rgba(gdk_color)
 
     def kelvin_spinner_changed(self, _):
         #try:
-        self.color_obj = color.Color(int(self.kelvin_spinbutton.get_value()), 'kelvin')
+        self.color_obj = colorful.Color(
+            int(self.kelvin_spinbutton.get_value()), 'kelvin')
         #except ValueError:
         print(int(self.kelvin_spinbutton.get_value()))
         red_percent = int(self.color_obj.hexstring[1:3], 16) / 255.
