@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #coding=utf8
 """
-Simple C/C++/FORTRAN90 Interpreter/Interactive Code Runner
+Simple C/C++/FORTRAN90 Interpreter/Interactive Code Runner.
 
 User can test lines of code, by inputting them and hitting EOF (^D or ^Z)
 to compile and run bits of code on the fly.
