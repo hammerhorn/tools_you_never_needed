@@ -20,21 +20,20 @@ class ColorSpectraBox(Gtk.Box):
 
         self.ansi_colorbutton = Gtk.ColorButton()
         self.ansi_spinbutton = Gtk.SpinButton.new_with_range(0, 255, 1)
-        self.ansi_spinbutton.connect("value-changed", self.ansi_spinner_changed)
-        self.ansi_spinner_changed(None)
+
+
         ansi_row = Gtk.Box(border_width=10, spacing=10)
+        
         ansi_row.pack_start(Gtk.Label(label='ANSI'), False, None, 0)
         ansi_row.pack_start(self.ansi_colorbutton, False, None, 0)
         ansi_row.pack_start(self.ansi_spinbutton, False, None, 0)
 
         self.rgb_colorbutton = Gtk.ColorButton()
         self.r_spinbutton = Gtk.SpinButton.new_with_range(0, 255, 1)
-        self.r_spinbutton.connect("value-changed", self.rgb_spinner_changed)
         self.g_spinbutton = Gtk.SpinButton.new_with_range(0, 255, 1)
-        self.g_spinbutton.connect("value-changed", self.rgb_spinner_changed)
         self.b_spinbutton = Gtk.SpinButton.new_with_range(0, 255, 1)
-        self.b_spinbutton.connect("value-changed", self.rgb_spinner_changed)
-        self.rgb_spinner_changed(None)
+
+
         rgb_row = Gtk.Box(border_width=10, spacing=10)
         rgb_row.pack_start(Gtk.Label(label='RGB'), False, None, 0)
         rgb_row.pack_start(self.rgb_colorbutton, False, None, 0)
@@ -44,14 +43,24 @@ class ColorSpectraBox(Gtk.Box):
 
         self.kelvin_colorbutton = Gtk.ColorButton()
         self.kelvin_spinbutton = Gtk.SpinButton.new_with_range(250, 10000, 10)
-        self.kelvin_spinbutton.connect(
-            "value-changed", self.kelvin_spinner_changed)
+
         self.kelvin_spinner_changed(None)
         kelvin_row = Gtk.Box(border_width=10, spacing=10)
         kelvin_row.pack_start(Gtk.Label(label='Kelvin'), False, None, 0)
         kelvin_row.pack_start(self.kelvin_colorbutton, False, None, 0)
         kelvin_row.pack_start(self.kelvin_spinbutton, False, None, 0)
 
+        self.ansi_spinbutton.connect("value-changed", self.ansi_spinner_changed)
+        self.r_spinbutton.connect("value-changed", self.rgb_spinner_changed)
+        self.g_spinbutton.connect("value-changed", self.rgb_spinner_changed)
+        self.b_spinbutton.connect("value-changed", self.rgb_spinner_changed)
+        self.kelvin_spinbutton.connect(
+            "value-changed", self.kelvin_spinner_changed)
+
+        self.ansi_spinner_changed(None)
+        self.rgb_spinner_changed(None)
+        self.kelvin_spinner_changed(None)
+        
         self.pack_start(self.main_menu_bar, False, None, 0)
         self.pack_start(ansi_row, False, None, 0)
         self.pack_start(rgb_row, False, None, 0)
@@ -126,9 +135,18 @@ class ColorSpectraBox(Gtk.Box):
 
     def ansi_spinner_changed(self, _):
         self.color_obj = colorful.Color(int(self.ansi_spinbutton.get_value()), 'ansi')
-        red_percent = int(self.color_obj.hexstring[1:3], 16) / 255.
-        green_percent = int(self.color_obj.hexstring[3:5], 16) / 255.
-        blue_percent = int(self.color_obj.hexstring[5:7], 16) / 255.
+        red_level = int(self.color_obj.hexstring[1:3], 16)
+        self.r_spinbutton.set_value(red_level)
+        red_percent = red_level / 255.
+        
+        green_level = int(self.color_obj.hexstring[3:5], 16)
+        self.g_spinbutton.set_value(green_level)
+        green_percent =  green_level / 255.
+        
+        blue_level = int(self.color_obj.hexstring[5:7], 16)
+        self.b_spinbutton.set_value(blue_level)        
+        blue_percent =  blue_level / 255.
+        
         gdk_color = Gdk.RGBA(red=red_percent, green=green_percent, blue=blue_percent)
         self.ansi_colorbutton.set_rgba(gdk_color)
 
@@ -160,6 +178,7 @@ class ColorSpectraBox(Gtk.Box):
 
 def main():
     window = Gtk.Window(title='Color and the EM Spectrum GTK')
+    window.set_icon_from_file('icons/rainbowflag.png')
     window.connect('delete-event', Gtk.main_quit)
     window.add(ColorSpectraBox())
     window.show_all()

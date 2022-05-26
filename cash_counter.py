@@ -22,7 +22,7 @@ def _parse_args():
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--nox', action='store_true', help='for the text-only version')
+        '--nox', action='store_true', help='for the console version')
     return parser.parse_args() if __name__ == '__main__' else None
 
 def nox():

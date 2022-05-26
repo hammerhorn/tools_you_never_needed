@@ -10,7 +10,6 @@ __license__ = 'GPL'
 
 def main():
     """ Main loop"""
-    
     while True:
         print(
             "\n***Enter a blank value to start over, ^C to quit***")

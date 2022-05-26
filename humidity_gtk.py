@@ -22,11 +22,10 @@ class LabelledSpinButtonBox(gtkstuff.LabelledSpinButtonBox):
     '''
     consists of a text entry box with a text label above it
     '''
-    def __init__(self, lo, hi, step, default, text, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(
-            lo, hi, step, default, label_markup=f'<small><b>{text}</b></small>', 
+            label_markup=f'<small><b>{text}</b></small>',
             orientation=Gtk.Orientation.VERTICAL, spacing=2, **kwargs)
-
 
 class HumidityWindow(Gtk.Window):
     def __init__(self):
