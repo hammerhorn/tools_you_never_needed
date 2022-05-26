@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-import time
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-import gtkstuff
 import soxmusic
 
 class PitchSetWindow(Gtk.Window):
@@ -37,7 +34,7 @@ class PitchSetWindow(Gtk.Window):
 
     def play_pitchset(self, _):
         self.pitchset.play()
-        self.pitchset.play_chord(wform='tri')  
+        self.pitchset.play_chord(wform='tri')
 
     def new_pitchset(self, _):
         self.pitchset = soxmusic.PitchSet(

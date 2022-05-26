@@ -2,8 +2,6 @@
 """
 A gui app to help me understand my old <music.Pitch> class
 """
-import decimal
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -21,7 +19,8 @@ class InputFrame(Gtk.Frame):
         self.add(self.box)
 
 class OutputFrame(Gtk.Frame):
-    def __init__(self, name="Pitch name", **kwargs):
+#    def __init__(self, name="Pitch name", **kwargs):
+    def __init__(self, **kwargs):    
         super().__init__(**kwargs)
         self.label = Gtk.Label()
         self.box = Gtk.Box(border_width=10)
@@ -39,7 +38,7 @@ class PitchBox(Gtk.Box):
         self.pack_start(self.input_frame, False, None, 0)
 
 class LabelledComboBox(Gtk.Box):
-    def __init__(self,text="Make a choice:", combo_list=None):
+    def __init__(self, text="Make a choice:", combo_list=None):
         super().__init__()
         self.label = Gtk.Label()
         self.label.set_markup(text)
@@ -59,7 +58,7 @@ class LabelledComboBox(Gtk.Box):
         self.combobox.add_attribute(renderer_text, "text", 0)
         self.pack_end(self.combobox, False, None, 0)
         self.pack_end(self.label, False, None, 0)
-        
+
     def update_combo(self, combo):
         """
         update selected item in response to combobox
@@ -82,9 +81,7 @@ class NotenameBox(PitchBox):
             "changed", self.on_note_changed)
         self.input_frame.octave_entrybox = gtkstuff.LabelledSpinButtonBox(
             label_markup="octave:",
-            lo=-1,
-            hi=10,
-            step=1,
+            lo_hi_step=(-1, 10, 1),
             default=4,
             orientation=Gtk.Orientation.HORIZONTAL)
         self.input_frame.octave_entrybox.spinbutton.set_alignment(xalign=1)
@@ -94,9 +91,7 @@ class NotenameBox(PitchBox):
 
         self.input_frame.cents_entrybox = gtkstuff.LabelledSpinButtonBox(
             label_markup="cents:",
-            lo=-50,
-            hi=50,
-            step=1,
+            lo_hi_step=(-50, 50, 1),
             default=0,
             orientation=Gtk.Orientation.HORIZONTAL)
         self.input_frame.cents_entrybox.spinbutton.set_alignment(xalign=1)
@@ -115,7 +110,7 @@ class NotenameBox(PitchBox):
         self.input_frame.entries.pack_start(
             self.input_frame.cents_entrybox, False, None, 0)
         self.input_frame.box.pack_start(
-           self.input_frame.entries, False, None, 0)
+            self.input_frame.entries, False, None, 0)
 
         self.pack_start(self.input_frame, False, None, 0)
         self.pack_start(self.output_frame, False, None, 0)
@@ -134,7 +129,6 @@ class NotenameBox(PitchBox):
         self.update_output_label(None)
         if self.autoplay:
             self.pitch.play()
-        
 
     def on_click(self, _):
         """
@@ -150,9 +144,7 @@ class FrequencyBox(PitchBox):
         self.output_frame.set_label('Pitch #2')
         self.input_frame.frequency_entrybox = gtkstuff.LabelledSpinButtonBox(
             label_markup='frequency (Hz):',
-            lo=-8,
-            hi=32000.,
-            step=.01,
+            lo_hi_step=(-8, 32000., .01),
             default=440.,
             orientation=Gtk.Orientation.HORIZONTAL)
         self.input_frame.frequency_entrybox.spinbutton.set_alignment(xalign=1)
@@ -196,7 +188,8 @@ class PitchTestBox(Gtk.Box):
         self.autoplay_switch.set_active(False)
         switchbox = Gtk.Box(border_width=30, orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         switchbox.pack_start(self.autoplay_switch, False, None, 0)
-        switchbox.pack_start(Gtk.Label('auto-play (note name and octave only)'), False, None,0)
+        switchbox.pack_start(
+            Gtk.Label('auto-play (note name and octave only)'), False, None, 0)
         right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         right_column.pack_start(self.frequency_box, False, None, 0)
         right_column.pack_start(switchbox, True, False, 0)
@@ -206,7 +199,7 @@ class PitchTestBox(Gtk.Box):
         methods_box.pack_start(right_column, False, None, 0)
 
         self.pack_start(methods_box, False, None, 0)
-        
+
     def on_switch_activated(self, switch, gparam):
         if self.autoplay_switch.get_active():
             self.notename_box.autoplay = True
@@ -219,7 +212,7 @@ class PitchTestBox(Gtk.Box):
 
 def main():
     # MAKE A MAIN WINDOW AND RUN THE THING
-    window = Gtk.Window(title="<soxmusic.Pitch>-tester")        
+    window = Gtk.Window(title="<soxmusic.Pitch>-tester")
     window.connect('delete-event', Gtk.main_quit)
     window.add(PitchTestBox())
     window.show_all()

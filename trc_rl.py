@@ -92,7 +92,7 @@ def main():
                 'pickle': lambda: row.save_p_file(f'__data__/{row.generate_basename()}'),
                 'play': row.play,  # pylint: disable=unnecessary-lambda
                 'plot': row.plot,  # pylint: disable=unnecessary-lambda
-                'retro': row.reverse,  # pylint: disable=unnecessary-lambda
+                'retro': row.retrograde,  # pylint: disable=unnecessary-lambda
                 'row': lambda: print(row.__dict__),
                 'rotate': row.rotate,  # pylint: disable=unnecessary-lambda
                 'shuffle': row.shuffle,
