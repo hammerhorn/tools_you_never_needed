@@ -43,6 +43,10 @@ class PitchSetWindow(Gtk.Window):
             f"<span font='monospace'>{self.pitchset}</span>")
         self.resize(1, 1)
 
-window = PitchSetWindow()
-window.show_all()
-Gtk.main()
+def main():
+    window = PitchSetWindow()
+    window.show_all()
+    Gtk.main()
+
+if __name__ == '__main__':
+    main()

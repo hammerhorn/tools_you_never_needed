@@ -35,10 +35,9 @@ class FortuneWindow(Gtk.Window):
     This window generates fortunes when the button is pressed.
     """
     def __init__(self):
-        super().__init__(title='Fortune Cookie')
-        self.set_border_width(10)
+        super().__init__(border_width=10, title='Fortune Cookie')
         self.set_icon_from_file('icons/cookie.png')
-        self.connect('destroy', Gtk.main_quit)
+        self.connect('delete-event', Gtk.main_quit)
 
         self.fortune = ""
 
@@ -60,9 +59,13 @@ class FortuneWindow(Gtk.Window):
         button_bar.pack_start(self.button, True, True, 0)
         button_bar.pack_start(copy_button, False, False, 0)
 
+
+        label_box = Gtk.Box(border_width=10)
+        label_box.pack_start(self.label, False, None, 0)
+        
         # Main layout
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        self.box.pack_start(self.label, False, False, 0)
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)#, spacing=10)
+        self.box.pack_start(label_box, False, False, 0)
         self.box.pack_start(button_bar, True, True, 0)
         self.add(self.box)
 
@@ -81,7 +84,7 @@ class FortuneWindow(Gtk.Window):
         """
         self.fortune = str(subprocess.check_output('fortune', shell=True), 'UTF-8')
 
-        self.label.set_label(self.fortune)
+        self.label.set_markup(f'<span font="serif" size="large"><i>{self.fortune}</i></span>')
 
         self.resize(1, 1)
 

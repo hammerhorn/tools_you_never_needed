@@ -5,19 +5,21 @@ serialism, using class <tonerow.Tonerow>.
 """
 # Standard Library
 import argparse
+import atexit
 import textwrap
 
 # Third-party
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-
 gi.require_version('GdkPixbuf', '2.0')
-from gi.repository import GdkPixbuf
 
-# Local modules
+from gi.repository import Gio, GdkPixbuf, Gtk
+
+# Local modulesabc2png
 import tonerow
+
+atexit.register(tonerow.Tonerow.clean)
 
 def _parse_args():
     """
@@ -26,8 +28,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     return parser.parse_args() if __name__ == '__main__' else None
 
-
-class TonerowWindow(Gtk.Window):
+class TonerowWindow(Gtk.ApplicationWindow):
     """
     Main window
     """
@@ -42,7 +43,7 @@ class TonerowWindow(Gtk.Window):
         self.row = tonerow.Tonerow()
         self.set_title(f'Tonerow Computer: {self.row.seq}')
 
-        ## Menu ##
+        # Menu
         self.main_menu_bar = Gtk.MenuBar()
 
         # File Menu
@@ -114,26 +115,28 @@ class TonerowWindow(Gtk.Window):
         self.main_menu_bar.append(play_menu_dropdown)
         self.main_menu_bar.append(help_menu_dropdown)
 
-        ## Image Area ##
+        # Image Area
         self.staff_image = Gtk.Image()
         self.row.create_png()
         self.pixbuf = GdkPixbuf.Pixbuf.new_from_file(
-            f'__data__/{self.row.basename}-cropped.png')
+            f'__data__/tmp-cropped.png')
         self.staff_image.set_from_pixbuf(self.pixbuf)
 
-        ## Notebook Area ##
+        # Notebook Area
         notebook = Gtk.Notebook()
 
         self.diagram_label = Gtk.Label()
-        formatted = self.row.draw(get_str=True, cntrl_chrs=False, heading=False)[1:-1]
+        formatted = self.row.draw(
+            get_str=True, cntrl_chrs=False, heading=False)[1:-1]
         formatted = formatted.replace('\n', '  \n')
         self.diagram_label.set_markup(
             f'<span font="monospace">{formatted}</span>'.replace(
                 '[*]', '<span bgcolor="grey">   </span>').rstrip('\n').replace(
                     '.', ' '))
         diagram_frame = Gtk.Frame()
-        diagram_frame.add(self.diagram_label)
-        diagram_box = Gtk.Box(border_width=10, orientation=Gtk.Orientation.HORIZONTAL)
+        diagram_frame.add(self.diagram_label) #abc2png
+        diagram_box = Gtk.Box(
+            border_width=10, orientation=Gtk.Orientation.HORIZONTAL)
         diagram_box.pack_start(diagram_frame, True, False, 0)
         notebook.append_page(diagram_box)
         notebook.set_tab_label_text(diagram_box, 'Diagram View')
@@ -150,18 +153,19 @@ class TonerowWindow(Gtk.Window):
 
         self.abc_label = Gtk.Label()
         self.abc_label.set_markup(
-            f'<span font="monospace">{self.row.generate_abc_str()}</span>')
+            f'<span font="monospace">{self.row.abc_str}</span>')
 
         abc_box = Gtk.Box(border_width=10)
         abc_box.pack_start(self.abc_label, True, False, 0)
         notebook.append_page(abc_box)
         notebook.set_tab_label_text(abc_box, 'View ABC Code')
 
-        notebook_box = Gtk.Box(border_width=10, orientation=Gtk.Orientation.VERTICAL)
+        notebook_box = Gtk.Box(
+            border_width=10, orientation=Gtk.Orientation.VERTICAL)
         notebook_box.pack_start(notebook, False, None, 0)
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        ## Main Layout ##
+        # Main Layout
         main_box.pack_start(self.main_menu_bar, False, None, 0)
         main_box.pack_start(self.staff_image, False, None, 0)
         main_box.pack_start(notebook_box, True, False, 0)
@@ -181,7 +185,7 @@ class TonerowWindow(Gtk.Window):
         open_dialog.set_default_response(Gtk.ResponseType.OK)
 
         file_filter = Gtk.FileFilter()
-        file_filter.set_name("tonerow files")
+        file_filter.set_name("tonerow (*.row) files")
         file_filter.add_pattern("*.row")
         open_dialog.add_filter(file_filter)
         response = open_dialog.run()
@@ -197,7 +201,11 @@ class TonerowWindow(Gtk.Window):
 
     def save(self, _):
         """save as plain text, duodecimal notation"""
-        self.row.write_txt(self.row.generate_basename(), 'row')
+        self.row.write_txt(self.row.basename, 'row')
+        notification = Gio.Notification()
+        notification.set_body(f'{self.row.basename}.row saved')
+        notification.set_priority(Gio.NotificationPriority.HIGH)
+        self.send_notification(None, notification)
 
     def shuffle(self, _):
         """shuffle the current row in place"""
@@ -245,7 +253,7 @@ class TonerowWindow(Gtk.Window):
         self.refresh_notebook()
         self.row.create_png()
         self.pixbuf = GdkPixbuf.Pixbuf.new_from_file(
-            f'__data__/{self.row.generate_basename()}-cropped.png')
+            f'__data__/tmp-cropped.png')
         self.staff_image.set_from_pixbuf(self.pixbuf)
 
     def refresh_notebook(self):
@@ -265,12 +273,12 @@ class TonerowWindow(Gtk.Window):
 
         self.abc_label.set_markup(
             f'<span font="monospace">'\
-            f'\n\n{self.row.generate_abc_str()}\n\n\n\n\n'\
+            f'\n\n{self.row.abc_str}\n\n\n\n\n'\
             '</span>')
 
     def play_midi(self, _):
         """play the row with your midi player"""
-        self.row.play_midi()
+        self.row.play_midi(player='audacious')
 
     def play(self, _):
         """play the row with SoX (SOund eXchange)"""

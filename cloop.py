@@ -16,7 +16,7 @@ import readline  # pylint: disable=unused-import
 import subprocess
 import sys
 
-#local
+# local
 import misc
 
 __author__ = 'Chris Horn <hammerhorn@gmail.com>'
@@ -54,9 +54,7 @@ def _set_language(args):
     return lang
 
 
-###############
-#  CONSTANTS  #
-###############
+# CONSTANTS
 EXTENSION = 'c'
 
 if __name__ == '__main__':
@@ -75,19 +73,14 @@ def cleanup():
 
 atexit.register(cleanup)
 
-# make this a dictionary
-if EXTENSION == 'cpp':
-    TITLE = 'C++ LOOP'
-elif EXTENSION == 'f95':
-    TITLE = 'FORTRAN 95 LOOP'
-else:
-    TITLE = 'C LOOP'
+TITLE_DICT = {
+    'cpp': 'C++',
+    'f95': 'FORTRAN 95'
+    }
 
+TITLE = f'{TITLE_DICT.get(EXTENSION, "C")} LOOP'
 
-
-##########
-#  MAIN  #
-##########
+#  MAIN
 def main():
     """
     Preprocessor "include" statements are the only thing the interpreter
@@ -132,14 +125,13 @@ def main():
 
             while True:
                 try:
-                    # turn on green text
-                    print('[32m[1m', end='', flush=True)
+                    print('[32m[1m', end='', flush=True)  # start green text
                     line = input().lstrip().rstrip('\n')
 
-                    # This is the bit that is missing from the C version
+                    # This is the bit that was missing from the C version
                     if len(line) == 0:
                         print()
-                    #print(f"length of line is {len(line)}")
+
                     if line.startswith('#include'):
                         includes = ''.join((includes, line, '\n'))
                     else:
@@ -154,13 +146,12 @@ def main():
                 file_ptr.write(f'{includes}\n{block}')
 
             command_list = [compiler_dict[EXTENSION]]
-            if EXTENSION == 'c':  # and 'math.h' in includes:
+            if EXTENSION == 'c':
                 command_list.extend([' -lm', ' -lncurses', ' -lreadline'])
             command_list.extend((' ./tmp.', EXTENSION))
             command = ''.join(command_list)
 
-            # turn off green text
-            print('[0m', end='', flush=True)
+            print('[0m', end='', flush=True)  # turn off green text
             try:
                 return_val = subprocess.check_call(command, shell=True)
             except subprocess.CalledProcessError:
@@ -169,7 +160,7 @@ def main():
             if return_val == 0:
                 proc = subprocess.Popen('./a.out', shell=True)
                 proc.wait()
-            print('')
+            print()
 
     except KeyboardInterrupt:
         print('\b\b\b', end='', flush=True)

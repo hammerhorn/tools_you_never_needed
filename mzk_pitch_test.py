@@ -19,8 +19,7 @@ class InputFrame(Gtk.Frame):
         self.add(self.box)
 
 class OutputFrame(Gtk.Frame):
-#    def __init__(self, name="Pitch name", **kwargs):
-    def __init__(self, **kwargs):    
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.label = Gtk.Label()
         self.box = Gtk.Box(border_width=10)

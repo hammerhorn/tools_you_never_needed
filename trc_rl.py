@@ -6,7 +6,6 @@ Depends: abc2midi, abcm2ps, ghostscript, imagemagick, python-termcolor,
 """
 #Std Lib
 import argparse
-import atexit
 import readline
 import subprocess
 import sys
@@ -36,7 +35,7 @@ __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 #    + write a new abc file when the row is modified
 #    + zero first note
 #
-#    * Figure out how to write abc without all the redundant natural signs
+#    + Figure out how to write abc without all the redundant natural signs
 #     (bug or feature?)"""
 
 def _parse_args():
@@ -72,7 +71,7 @@ def main():
     """
     welcome()
     rlif.howto()
-  
+
     row = Tonerow(TONE_COUNT)
 
     #new_row()

@@ -17,7 +17,7 @@ except ImportError:
 # Local modules
 import cows
 import gtkstuff
-import runbashcommand
+import newterminal
 
 __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 __license__ = 'GPL'
@@ -52,9 +52,9 @@ class CowsWindow(Gtk.Window):
             dir_name = f'{dir_name}/'
 
         # run cowsay in a new terminal window in your default terminal
-        runbashcommand.runbashcommand(
+        newterminal.runcommand(
             f'cowsay -f {self.comboinputbox.selected_item} '\
-            f'"{self.comboinputbox.entry.get_text()}"')
+            f'"{self.comboinputbox.entry.get_text()}"', hold=True)
 
 def main():
     """

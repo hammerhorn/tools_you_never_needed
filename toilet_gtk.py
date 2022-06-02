@@ -15,7 +15,7 @@ except ImportError:
 
 import figlet
 import gtkstuff
-import runbashcommand
+import newterminal
 
 __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 __license__ = 'GPL'
@@ -86,7 +86,7 @@ class ToiletWindow(Gtk.Window):
             f'"{self.comboinputbox.entry.get_text()}"'
 
         # This function runs a command in a new window
-        runbashcommand.runbashcommand(command_to_run)
+        newterminal.runcommand(command_to_run)
 
 
 _parse_args()
