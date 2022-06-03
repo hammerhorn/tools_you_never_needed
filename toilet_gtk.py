@@ -21,8 +21,8 @@ __author__ = 'Chris Horn <hammerhorn@gmail.com>'
 __license__ = 'GPL'
 
 def _parse_args():
-    """                                                                         
-    Parse arguments.                                                            
+    """
+    Parse arguments.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     return parser.parse_args() if __name__ == '__main__' else None

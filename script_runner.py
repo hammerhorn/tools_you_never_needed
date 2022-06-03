@@ -100,8 +100,8 @@ class ScriptRunnerWindow(Gtk.Window):
         refresh the max line length possible using the spinbutton
         This does not play nicely with terminator.
         """
-        with open(self.selected_script, 'r') as fp:
-            lines_in_file = len(fp.readlines())
+        with open(self.selected_script, 'r') as filepointer:
+            lines_in_file = len(filepointer.readlines())
         if self.line_number:
             self.line_number.set_range(1, lines_in_file)
             self.line_number.set_value(1)
@@ -206,10 +206,10 @@ class ScriptRunnerWindow(Gtk.Window):
         script_list = _load_script_names()
         for script_name in script_list:
             self.scriptnames_liststore.append([script_name])
-        try:
-            self.combobox.set_active(script_list.index(current_script))
-        except:
-            pass
+        # try:
+        self.combobox.set_active(script_list.index(current_script))
+        # except:
+        #    pass
 
         self.set_title(f'Runner: {self.selected_dir}')#.split("/")[-1]}')
 

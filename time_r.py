@@ -73,7 +73,7 @@ if TIME_STR[0] == ':':
 SECONDS = float(TIME_STR) if TIME_STR.isdigit() else float(
     misc.mmss_convert(TIME_STR))
 _SINCE = time.time()
-#FIG_WRITER = Figlet(font='pagga')
+
 FIG_WRITER = Figlet(font='future')
 
 ##########

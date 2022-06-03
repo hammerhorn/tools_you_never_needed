@@ -62,7 +62,7 @@ class FortuneWindow(Gtk.Window):
 
         label_box = Gtk.Box(border_width=10)
         label_box.pack_start(self.label, False, None, 0)
-        
+
         # Main layout
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)#, spacing=10)
         self.box.pack_start(label_box, False, False, 0)
